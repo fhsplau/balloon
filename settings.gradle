@@ -1,2 +1,3 @@
 rootProject.name = 'balloon_data'
 include 'data'
+include 'generator'
