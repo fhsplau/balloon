@@ -1,6 +1,6 @@
 package org.balloon.generator
 
-import java.nio.file.Path
+import java.nio.file.{Path, Paths}
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, ClosedShape, IOResult}
@@ -42,10 +42,5 @@ case class Generator(observatories: List[String])(implicit system: ActorSystem, 
 object Generator {
   val defaultObservatories: List[String] = List("AU", "US", "FR", "PL", "GB", "DE")
 
-  def apply(): Generator = Generator(defaultObservatories)
+  def apply()(implicit system: ActorSystem, materializer: ActorMaterializer) : Generator = Generator(defaultObservatories)
 }
-
-// TODO remove this
-//compile group: 'com.lihaoyi', name: 'ammonite_2.12.3', version: '1.0.2'
-//ammonite.Main(predefCode = "repl.frontEnd() = ammonite.repl.FrontEnd.JLineUnix\nimport org.balloon.data.temperature.{Celsius, Fahrenheit, Kelvin}").run(
-//)
