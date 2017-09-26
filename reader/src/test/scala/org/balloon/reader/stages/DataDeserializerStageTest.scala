@@ -14,8 +14,7 @@ import org.scalatest._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class DataDeserializerStageTest extends TestKit(ActorSystem("DataDeserializerTestSystem")) with FreeSpecLike with Matchers
-  with BeforeAndAfterAll {
+class DataDeserializerStageTest extends TestKit(ActorSystem("DataDeserializerTestSystem")) with FreeSpecLike with Matchers {
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
