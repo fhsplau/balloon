@@ -2,10 +2,13 @@ package org.balloon.generator.connection
 
 import org.balloon.data.observatory.{Australia, France, Other, UnitedStates}
 import org.balloon.generator.simulator.BalloonSimulator
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FreeSpec, Matchers}
 
 import scala.concurrent.ExecutionContext
 
+@RunWith(classOf[JUnitRunner])
 class ConnectionTest extends FreeSpec with Matchers {
   implicit val ex: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
