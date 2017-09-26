@@ -14,7 +14,7 @@ import org.scalatest._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class DataDeserializerTest extends TestKit(ActorSystem("DataDeserializerTestSystem")) with FreeSpecLike with Matchers
+class DataDeserializerStageTest extends TestKit(ActorSystem("DataDeserializerTestSystem")) with FreeSpecLike with Matchers
   with BeforeAndAfterAll {
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -23,7 +23,7 @@ class DataDeserializerTest extends TestKit(ActorSystem("DataDeserializerTestSyst
     "is valid deserialize observatory data" in {
       val source = Source.single("2014-10-29T13:34:21|10|AU")
       val sink = Sink.head[ObservatoryData]
-      val flow: Flow[String, ObservatoryData, NotUsed] = Flow[String].via(new DataDeserializer)
+      val flow: Flow[String, ObservatoryData, NotUsed] = Flow[String].via(new DataDeserializerStage)
       val f: Future[ObservatoryData] = source.via(flow).runWith(sink)
 
       val data = Await.result(f, 2 seconds)
@@ -32,7 +32,7 @@ class DataDeserializerTest extends TestKit(ActorSystem("DataDeserializerTestSyst
 
     "is invalid deserializer omits it" in {
       val source = Source(List("2014-10-29T13:34|10|AU", "2014-10-29T13:34:21|10|AU"))
-      val flow: Flow[String, ObservatoryData, NotUsed] = Flow[String].via(new DataDeserializer)
+      val flow: Flow[String, ObservatoryData, NotUsed] = Flow[String].via(new DataDeserializerStage)
       val f: Future[List[ObservatoryData]] = source.via(flow).runFold(List[ObservatoryData]())((a, b) => b :: a)
 
       val data = Await.result(f, 2 seconds)

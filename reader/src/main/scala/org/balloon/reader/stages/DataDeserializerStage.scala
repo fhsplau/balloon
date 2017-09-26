@@ -4,7 +4,7 @@ import akka.stream.{Attributes, FlowShape, Inlet, Outlet}
 import akka.stream.stage.{GraphStage, GraphStageLogic, InHandler, OutHandler}
 import org.balloon.data.observatory.ObservatoryData
 
-class DataDeserializer extends GraphStage[FlowShape[String, ObservatoryData]] {
+class DataDeserializerStage extends GraphStage[FlowShape[String, ObservatoryData]] {
   val input: Inlet[String] = Inlet[String]("line.in")
   val output: Outlet[ObservatoryData] = Outlet[ObservatoryData]("data.out")
 
