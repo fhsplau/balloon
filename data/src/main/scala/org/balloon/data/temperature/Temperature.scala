@@ -11,6 +11,12 @@ trait Temperature {
   def to[T <: TemperatureScale : TypeTag]: Temperature
 
   def +[T <: Temperature : TypeTag](that: T): Temperature
+
+  def >[T <: Temperature : TypeTag](that: T): Boolean
+
+  def <[T <: Temperature : TypeTag](that: T): Boolean = that > this
+
+  def ==[T <: Temperature : TypeTag](that: T): Boolean = !((this > that) || (this < that))
 }
 
 case class Celsius(value: Int) extends TemperatureScale with Temperature {
@@ -22,6 +28,8 @@ case class Celsius(value: Int) extends TemperatureScale with Temperature {
 
   override def +[T <: Temperature : universe.TypeTag](that: T): Temperature =
     Celsius(that.to[Celsius].value + value)
+
+  override def >[T <: Temperature : universe.TypeTag](that: T): Boolean = value > that.to[Celsius].value
 }
 
 case class Kelvin(value: Int) extends TemperatureScale with Temperature {
@@ -33,6 +41,8 @@ case class Kelvin(value: Int) extends TemperatureScale with Temperature {
 
   override def +[T <: Temperature : universe.TypeTag](that: T): Temperature =
     Kelvin((that.to[Kelvin].value + value - 273.15).toInt)
+
+  override def >[T <: Temperature : universe.TypeTag](that: T): Boolean = this.to[Celsius] > that.to[Celsius]
 }
 
 case class Fahrenheit(value: Int) extends TemperatureScale with Temperature {
@@ -45,4 +55,5 @@ case class Fahrenheit(value: Int) extends TemperatureScale with Temperature {
   override def +[T <: Temperature : universe.TypeTag](that: T): Temperature =
     (this.to[Celsius] + that.to[Celsius]).to[Fahrenheit]
 
+  override def >[T <: Temperature : universe.TypeTag](that: T): Boolean = this.to[Celsius] > that.to[Celsius]
 }

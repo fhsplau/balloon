@@ -80,5 +80,52 @@ class TemperatureTest extends FreeSpec with Matchers with BeforeAndAfter {
     }
   }
 
+  "Temperature is" - {
+    "greater than temperature" - {
+      "Celsius" in {
+        val t1 = Celsius(20)
+        val t2 = Kelvin(283)
 
+        (t1 > t2) should be(true)
+      }
+
+      "Kelvin" in {
+        val t1 = Kelvin(293)
+        val t2 = Celsius(10)
+
+        (t1 > t2) should be(true)
+      }
+
+      "Fahrenheit" in {
+        val t1 = Fahrenheit(60)
+        val t2 = Celsius(10)
+
+        (t1 > t2) should be(true)
+      }
+    }
+
+    "smaller than" in {
+      val t1 = Celsius(10)
+      val t2 = Kelvin(293)
+
+      (t1 < t2) should be(true)
+    }
+
+    "not greater than" in {
+      val t1 = Celsius(20)
+      val t2 = Kelvin(283)
+
+      (t2 > t1) should be(false)
+    }
+
+    "equal" in {
+      (Celsius(10) == Kelvin(283)) should be(true)
+    }
+
+    "not equal" in {
+      (Celsius(20) == Kelvin(273)) should be(false)
+    }
+
+
+  }
 }
