@@ -1,4 +1,4 @@
-group 'generator'
+group 'reader'
 
 dependencies {
   compile project(":data")
