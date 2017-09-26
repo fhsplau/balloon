@@ -56,4 +56,29 @@ class TemperatureTest extends FreeSpec with Matchers with BeforeAndAfter {
       }
     }
   }
+
+  "Can add" - {
+    "Celsius to other" in {
+      val t1 = Celsius(10)
+      val t2 = Fahrenheit(50)
+
+      (t1 + t2) should equal(Celsius(20))
+    }
+
+    "Kelvin to other" in {
+      val t1 = Kelvin(283)
+      val t2 = Celsius(10)
+
+      (t1 + t2) should equal(Kelvin(292))
+    }
+
+    "Fahrenheit to other" in {
+      val t1 = Fahrenheit(50)
+      val t2 = Celsius(10)
+
+      (t1 + t2) should equal(Fahrenheit(68))
+    }
+  }
+
+
 }
