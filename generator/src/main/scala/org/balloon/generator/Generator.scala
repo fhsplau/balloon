@@ -20,8 +20,8 @@ case class Generator(observatories: List[String])(implicit system: ActorSystem, 
   def run(numberOfData: Int, fileName: Path): Future[IOResult] = {
     val n = numberOfData / observatories.length
     val connections = connectionsF(n)
-    val serializer = Flow[ObservatoryData].map(d => d.serialize)
-    val writer = Flow[String].mapAsync(5)(s => Future(ByteString(s + "\n"))).toMat(FileIO.toPath(fileName))(Keep.right)
+    val serializer = Flow[ObservatoryData].mapAsync(2)(d => Future(d.serialize))
+    val writer = Flow[String].map(s => ByteString(s + "\n")).toMat(FileIO.toPath(fileName))(Keep.right)
 
     val g = RunnableGraph.fromGraph(GraphDSL.create(writer) { implicit b =>
       sink =>
@@ -37,6 +37,12 @@ case class Generator(observatories: List[String])(implicit system: ActorSystem, 
 
     g.run()
   }
+}
+
+object Generator {
+  val defaultObservatories: List[String] = List("AU", "US", "FR", "PL", "GB", "DE")
+
+  def apply(): Generator = Generator(defaultObservatories)
 }
 
 // TODO remove this
