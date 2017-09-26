@@ -1,6 +1,13 @@
 group 'client'
 
+apply plugin: 'application'
+
+mainClassName = 'Main'
+
 dependencies {
+  compile project(":data")
+  compile project(":generator")
+  compile project(":reader")
   compile group: 'com.lihaoyi', name: 'ammonite_2.12.3', version: '1.0.2'
   compile group: 'com.typesafe.akka', name: 'akka-stream_2.12', version: '2.5.4'
 }
