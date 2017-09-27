@@ -1,9 +1,12 @@
 package org.balloon.reader
 
+import java.nio.file.Path
+
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream._
-import akka.stream.scaladsl.{Flow, GraphDSL, Sink, Source, Zip}
+import akka.stream.scaladsl.{FileIO, Flow, GraphDSL, Keep, RunnableGraph, Sink, Source, Zip}
+import akka.util.ByteString
 import org.balloon.data.observatory.{Observatory, ObservatoryData}
 import org.balloon.data.temperature.{Celsius, Temperature, TemperatureScale}
 
@@ -72,6 +75,14 @@ case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(impl
     })
 
     graph.map(m => if (m._1.isEmpty) None else Some(Celsius(m._1.get.value / m._2).to[T])).runWith(Sink.head)
+  }
+
+  def save(filename: Path, m: ObservatoryData => ObservatoryData): Future[IOResult] = {
+    val writer = Flow[String].map(s => ByteString(s + "\n")).toMat(FileIO.toPath(filename))(Keep.right)
+    val serialize = Flow[ObservatoryData].map(d => s"${d.timestamp}|${d.temperature.value}${d.temperature.shortName}|${d.observatoryName}")
+    val mapper = Flow[ObservatoryData].map(m)
+
+    source.via(mapper).via(serialize).runWith(writer)
   }
 
   private def mapTemperature = {
