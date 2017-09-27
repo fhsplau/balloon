@@ -6,6 +6,7 @@ import scala.reflect.runtime.universe._
 trait TemperatureScale
 
 trait Temperature {
+  val shortName: String
   val value: Int
 
   def to[T <: TemperatureScale : TypeTag]: Temperature
@@ -28,9 +29,12 @@ object EmptyTemperature extends Temperature {
   override def +[T <: Temperature : universe.TypeTag](that: T): Temperature = that
 
   override def >[T <: Temperature : universe.TypeTag](that: T): Boolean = false
+
+  override val shortName = "EMPTY"
 }
 
 case class Celsius(value: Int) extends TemperatureScale with Temperature {
+
   override def to[T <: TemperatureScale : universe.TypeTag]: Temperature = typeOf[T] match {
     case t if t =:= typeOf[Celsius] => this
     case t if t =:= typeOf[Kelvin] => Kelvin(Math.round(value + 273.15).toInt)
@@ -41,6 +45,8 @@ case class Celsius(value: Int) extends TemperatureScale with Temperature {
     Celsius(that.to[Celsius].value + value)
 
   override def >[T <: Temperature : universe.TypeTag](that: T): Boolean = value > that.to[Celsius].value
+
+  override val shortName = "C"
 }
 
 case class Kelvin(value: Int) extends TemperatureScale with Temperature {
@@ -54,6 +60,8 @@ case class Kelvin(value: Int) extends TemperatureScale with Temperature {
     Kelvin((that.to[Kelvin].value + value - 273.15).toInt)
 
   override def >[T <: Temperature : universe.TypeTag](that: T): Boolean = this.to[Celsius] > that.to[Celsius]
+
+  override val shortName = "K"
 }
 
 case class Fahrenheit(value: Int) extends TemperatureScale with Temperature {
@@ -67,4 +75,6 @@ case class Fahrenheit(value: Int) extends TemperatureScale with Temperature {
     (this.to[Celsius] + that.to[Celsius]).to[Fahrenheit]
 
   override def >[T <: Temperature : universe.TypeTag](that: T): Boolean = this.to[Celsius] > that.to[Celsius]
+
+  override val shortName = "F"
 }
