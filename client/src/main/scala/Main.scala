@@ -1,11 +1,5 @@
-import org.balloon.data.observatory.{Australia, France, Other, UnitedStates}
-
 object Main {
   def main(args: Array[String]): Unit = {
-    Australia
-    Other
-    UnitedStates
-    France
     val imports: List[String] = List(
       "import org.balloon.data.temperature.{Celsius, Fahrenheit, Kelvin}",
       "import org.balloon.data.temperature.{Kilometers, Miles, Meters}",
