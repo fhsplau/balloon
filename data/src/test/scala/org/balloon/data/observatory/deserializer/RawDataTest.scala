@@ -10,8 +10,8 @@ class RawDataTest extends FreeSpec with Matchers {
   "Raw data" - {
     "returns" -{
       "raw data if line contains all the information" in {
-        val line: String = "2017-10-29:13:21:45|10|AU"
-        RawData.from(line) should be(Some(RawData("2017-10-29:13:21:45", "10", "AU")))
+        val line: String = "2017-10-29:13:21:45|10,5|10|AU"
+        RawData.from(line) should be(Some(RawData("2017-10-29:13:21:45", "10,5", "10", "AU")))
       }
 
       "None is line doesn't contains all the information" in {

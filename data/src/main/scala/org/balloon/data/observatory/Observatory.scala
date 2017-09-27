@@ -3,7 +3,7 @@ package org.balloon.data.observatory
 import java.time.LocalDateTime
 
 import org.balloon.data.observatory.deserializer.{DataDeserializer, RawData}
-import org.balloon.data.temperature.Temperature
+import org.balloon.data.temperature.{Coordinates, Temperature}
 import org.balloon.data.utils.TimeStamp
 
 import scala.reflect.runtime.universe
@@ -22,41 +22,43 @@ trait ObservatoryData {
 
   val timestamp: LocalDateTime
 
+  val coordinates: Coordinates
+
   def is[O <: Observatory[O] : TypeTag]: Boolean
 
-  def copy(temperature: Temperature = this.temperature): ObservatoryData
+  def copy(temperature: Temperature = this.temperature, c: Coordinates = this.coordinates): ObservatoryData
 
-  def serialize: String = s"${timestamp.format(TimeStamp.pattern)}|${temperature.value}|$observatoryName"
+  def serialize: String = s"${timestamp.format(TimeStamp.pattern)}|${coordinates.x.value},${coordinates.y.value}|${temperature.value}|$observatoryName"
 }
 
-case class Australia(timestamp: LocalDateTime, temperature: Temperature) extends Observatory[Australia] with ObservatoryData {
+case class Australia(timestamp: LocalDateTime, coordinates: Coordinates, temperature: Temperature) extends Observatory[Australia] with ObservatoryData {
   override val observatoryName: String = "AU"
 
   override def is[O <: Observatory[O] : universe.TypeTag]: Boolean = typeOf[Australia] =:= typeOf[O]
 
-  override def copy(t: Temperature = this.temperature): ObservatoryData = Australia(timestamp, t)
+  override def copy(t: Temperature = this.temperature, c: Coordinates = this.coordinates): ObservatoryData = Australia(timestamp, c,t)
 }
 
-case class France(timestamp: LocalDateTime, temperature: Temperature) extends Observatory[France] with ObservatoryData {
+case class France(timestamp: LocalDateTime, coordinates: Coordinates, temperature: Temperature) extends Observatory[France] with ObservatoryData {
   override val observatoryName: String = "FR"
 
   override def is[O <: Observatory[O] : universe.TypeTag]: Boolean = typeOf[France] =:= typeOf[O]
 
-  override def copy(t: Temperature = this.temperature): ObservatoryData = France(timestamp, t)
+  override def copy(t: Temperature = this.temperature, c: Coordinates = this.coordinates): ObservatoryData = France(timestamp, c,t)
 }
 
-case class UnitedStates(timestamp: LocalDateTime, temperature: Temperature) extends Observatory[UnitedStates] with ObservatoryData {
+case class UnitedStates(timestamp: LocalDateTime, coordinates: Coordinates, temperature: Temperature) extends Observatory[UnitedStates] with ObservatoryData {
   override val observatoryName: String = "US"
 
   override def is[O <: Observatory[O] : universe.TypeTag]: Boolean = typeOf[UnitedStates] =:= typeOf[O]
 
-  override def copy(t: Temperature = this.temperature): ObservatoryData = UnitedStates(timestamp, t)
+  override def copy(t: Temperature = this.temperature, c: Coordinates = this.coordinates): ObservatoryData = UnitedStates(timestamp, c,t)
 }
 
-case class Other(observatoryName: String, timestamp: LocalDateTime, temperature: Temperature) extends Observatory[Other] with ObservatoryData {
+case class Other(observatoryName: String, timestamp: LocalDateTime, coordinates: Coordinates, temperature: Temperature) extends Observatory[Other] with ObservatoryData {
   override def is[O <: Observatory[O] : universe.TypeTag]: Boolean = typeOf[Other] =:= typeOf[O]
 
-  override def copy(t: Temperature = this.temperature): ObservatoryData = Other(observatoryName, timestamp, t)
+  override def copy(t: Temperature = this.temperature, c: Coordinates = this.coordinates): ObservatoryData = Other(observatoryName, timestamp, c, t)
 }
 
 object ObservatoryData {

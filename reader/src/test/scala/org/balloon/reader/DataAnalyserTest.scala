@@ -23,11 +23,11 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
 
   val timestamp: LocalDateTime = TimeStamp.now
   private val observations = List(
-    Australia(timestamp, Celsius(20)),
-    UnitedStates(timestamp, Fahrenheit(50)),
-    France(timestamp, Kelvin(283)),
-    Other("PL", timestamp, Kelvin(0)),
-    Other("DE", timestamp, Kelvin(283))
+    Australia(timestamp, Coordinates(Kilometers(10), Kilometers(5)), Celsius(20)),
+    UnitedStates(timestamp, Coordinates(Miles(10), Miles(5)), Fahrenheit(50)),
+    France(timestamp, Coordinates(Meters(10), Meters(5)), Kelvin(283)),
+    Other("PL", timestamp, Coordinates(Kilometers(10), Kilometers(5)), Kelvin(0)),
+    Other("DE", timestamp, Coordinates(Kilometers(10), Kilometers(5)), Kelvin(283))
   )
 
   val source = Source(observations)
@@ -43,7 +43,7 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
 
   test("filter source") {
     val l: List[ObservatoryData] = Await.result(dataAnalyser.filter(_.is[Australia]), 2 seconds)
-    l should equal(List(Australia(timestamp, Celsius(20))))
+    l should equal(List(Australia(timestamp, Coordinates(Kilometers(10), Kilometers(5)), Celsius(20))))
   }
 
   test("number of observations") {

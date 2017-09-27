@@ -79,7 +79,8 @@ case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(impl
 
   def save(filename: Path, m: ObservatoryData => ObservatoryData): Future[IOResult] = {
     val writer = Flow[String].map(s => ByteString(s + "\n")).toMat(FileIO.toPath(filename))(Keep.right)
-    val serialize = Flow[ObservatoryData].map(d => s"${d.timestamp}|${d.temperature.value}${d.temperature.shortName}|${d.observatoryName}")
+    val serialize = Flow[ObservatoryData].map(d =>
+      s"${d.timestamp}|${d.coordinates.x.value},${d.coordinates.y.value}${d.coordinates.x.shortName}|${d.temperature.value}${d.temperature.shortName}|${d.observatoryName}")
     val mapper = Flow[ObservatoryData].map(m)
 
     source.via(mapper).via(serialize).runWith(writer)

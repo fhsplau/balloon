@@ -42,4 +42,6 @@ case class Meters(value: Double) extends Distance with DistanceUnit {
   }
 }
 
-case class Coordinates(x: Distance, y: Distance)
+case class Coordinates(x: Distance, y: Distance) {
+  def to[T <: DistanceUnit: TypeTag]: Coordinates = Coordinates(x.to[T], y.to[T])
+}
