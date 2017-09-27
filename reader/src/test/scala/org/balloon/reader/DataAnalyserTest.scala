@@ -20,7 +20,7 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
 
   val timestamp: LocalDateTime = TimeStamp.now
   val source = Source(List(
-    Australia(timestamp, Celsius(10)),
+    Australia(timestamp, Celsius(20)),
     UnitedStates(timestamp, Fahrenheit(50)),
     France(timestamp, Kelvin(283)),
     Other("PL", timestamp, Kelvin(0)),
@@ -60,6 +60,12 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
     val t: Option[Temperature] = Await.result(dataAnalyser.minimumTemperature, 2 seconds)
     t should not be None
     t.get should be(Kelvin(0))
+  }
+
+  test("maximum temperature") {
+    val t: Option[Temperature] = Await.result(dataAnalyser.maximumTemperature, 2 seconds)
+    t should not be None
+    t.get should be(Celsius(20))
   }
 
 }
