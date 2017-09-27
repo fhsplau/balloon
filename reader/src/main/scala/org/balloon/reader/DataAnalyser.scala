@@ -3,15 +3,15 @@ package org.balloon.reader
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream._
-import akka.stream.scaladsl.{Flow, Source}
-import akka.stream.stage.{GraphStage, GraphStageLogic, InHandler, OutHandler}
+import akka.stream.scaladsl.{Flow, GraphDSL, Sink, Source, Zip}
 import org.balloon.data.observatory.{Observatory, ObservatoryData}
-import org.balloon.data.temperature.Temperature
+import org.balloon.data.temperature.{Celsius, Temperature, TemperatureScale}
 
 import scala.concurrent.Future
 import scala.reflect.runtime.universe._
 
 case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(implicit system: ActorSystem, materializer: ActorMaterializer) {
+
   import system.dispatcher
 
   private val source = Source.fromGraph(data)
@@ -25,7 +25,7 @@ case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(impl
   }
 
   def minimumTemperature: Future[Option[Temperature]] = {
-    source.via(mapTemperature).runFold(Option.empty[Temperature]){(t1, t2) =>
+    source.via(mapTemperature).runFold(Option.empty[Temperature]) { (t1, t2) =>
       t1 match {
         case None => Some(t2)
         case Some(t) => t match {
@@ -37,7 +37,7 @@ case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(impl
   }
 
   def maximumTemperature: Future[Option[Temperature]] = {
-    source.via(mapTemperature).runFold(Option.empty[Temperature]){(t1, t2) =>
+    source.via(mapTemperature).runFold(Option.empty[Temperature]) { (t1, t2) =>
       t1 match {
         case None => Some(t2)
         case Some(t) => t match {
@@ -46,6 +46,32 @@ case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(impl
         }
       }
     }
+  }
+
+  def meanTemperature[T <: TemperatureScale : TypeTag]: Future[Option[Temperature]] = {
+    val toCelsius = Flow[Temperature].map(_.to[Celsius])
+    val sum: Flow[Temperature, Option[Temperature], NotUsed] = Flow[Temperature].fold(Option.empty[Temperature]) { (t1, t2) =>
+      t1 match {
+        case None => Some(t2)
+        case Some(t) => Some(t + t2)
+      }
+    }
+
+    val count: Flow[Temperature, Int, NotUsed] = Flow[Temperature].fold(0)((a, _) => a + 1)
+
+    val celsiusSource = source.via(mapTemperature).via(toCelsius)
+
+    val graph = Source.fromGraph(GraphDSL.create() { implicit b =>
+      import GraphDSL.Implicits._
+      val zip = b.add(Zip[Option[Temperature], Int])
+
+      celsiusSource ~> sum ~> zip.in0
+      celsiusSource ~> count ~> zip.in1
+
+      SourceShape(zip.out)
+    })
+
+    graph.map(m => if (m._1.isEmpty) None else Some(Celsius(m._1.get.value / m._2).to[T])).runWith(Sink.head)
   }
 
   private def mapTemperature = {

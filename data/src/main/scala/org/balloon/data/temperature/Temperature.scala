@@ -19,6 +19,17 @@ trait Temperature {
   def ==[T <: Temperature : TypeTag](that: T): Boolean = !((this > that) || (this < that))
 }
 
+//Only for testing
+object EmptyTemperature extends Temperature {
+  override lazy val value = throw new Exception("Empty temperature")
+
+  override def to[T <: TemperatureScale : universe.TypeTag]: Temperature = this
+
+  override def +[T <: Temperature : universe.TypeTag](that: T): Temperature = that
+
+  override def >[T <: Temperature : universe.TypeTag](that: T): Boolean = false
+}
+
 case class Celsius(value: Int) extends TemperatureScale with Temperature {
   override def to[T <: TemperatureScale : universe.TypeTag]: Temperature = typeOf[T] match {
     case t if t =:= typeOf[Celsius] => this

@@ -8,7 +8,7 @@ import akka.stream.scaladsl.{GraphDSL, Merge, Source}
 import akka.stream.{ActorMaterializer, Graph, SourceShape}
 import akka.testkit.TestKit
 import org.balloon.data.observatory.{Other, _}
-import org.balloon.data.temperature.{Celsius, Fahrenheit, Kelvin, Temperature}
+import org.balloon.data.temperature._
 import org.balloon.data.utils.TimeStamp
 import org.scalatest.{FunSuiteLike, Matchers}
 
@@ -19,13 +19,15 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   val timestamp: LocalDateTime = TimeStamp.now
-  val source = Source(List(
+  private val observations = List(
     Australia(timestamp, Celsius(20)),
     UnitedStates(timestamp, Fahrenheit(50)),
     France(timestamp, Kelvin(283)),
     Other("PL", timestamp, Kelvin(0)),
     Other("DE", timestamp, Kelvin(283))
-  ))
+  )
+
+  val source = Source(observations)
 
   val graph: Graph[SourceShape[ObservatoryData], NotUsed] = GraphDSL.create() { implicit b =>
     import GraphDSL.Implicits._
@@ -66,6 +68,14 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
     val t: Option[Temperature] = Await.result(dataAnalyser.maximumTemperature, 2 seconds)
     t should not be None
     t.get should be(Celsius(20))
+  }
+
+  test("mean temperature") {
+    val sum = observations.map(_.temperature.to[Celsius]).fold(EmptyTemperature.asInstanceOf[Temperature])(_ + _).value
+    val mean = Celsius(sum / observations.length)
+    val t: Option[Temperature] = Await.result(dataAnalyser.meanTemperature[Celsius], 2 seconds)
+    t should not be None
+    t.get should equal(mean)
   }
 
 }
