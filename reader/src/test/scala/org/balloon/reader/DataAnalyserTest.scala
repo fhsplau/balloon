@@ -10,11 +10,14 @@ import akka.testkit.TestKit
 import org.balloon.data.observatory.{Other, _}
 import org.balloon.data.temperature._
 import org.balloon.data.utils.TimeStamp
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuiteLike, Matchers}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
+@RunWith(classOf[JUnitRunner])
 class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")) with FunSuiteLike with Matchers {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 

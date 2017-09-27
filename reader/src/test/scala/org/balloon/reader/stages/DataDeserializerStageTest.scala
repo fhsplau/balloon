@@ -9,11 +9,14 @@ import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.testkit.TestKit
 import org.balloon.data.observatory.{Australia, ObservatoryData}
 import org.balloon.data.temperature.Celsius
+import org.junit.runner.RunWith
 import org.scalatest._
+import org.scalatest.junit.JUnitRunner
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
+@RunWith(classOf[JUnitRunner])
 class DataDeserializerStageTest extends TestKit(ActorSystem("DataDeserializerTestSystem")) with FreeSpecLike with Matchers {
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
