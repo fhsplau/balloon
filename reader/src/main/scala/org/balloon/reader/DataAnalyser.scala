@@ -14,19 +14,18 @@ import scala.reflect.runtime.universe._
 case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(implicit system: ActorSystem, materializer: ActorMaterializer) {
   import system.dispatcher
 
+  private val source = Source.fromGraph(data)
+
   def filter(f: ObservatoryData => Boolean): Future[List[ObservatoryData]] =
     Source.fromGraph(data).filter(f).runFold(List[ObservatoryData]())((a, b) => b :: a)
 
   def numOfObservations[T <: Observatory[T] : TypeTag](f: ObservatoryData => Boolean = _ => true): Future[Int] = {
-    val source = Source.fromGraph(data)
     val filter = Flow[ObservatoryData].filter(_.is[T]).filter(f)
     source.via(filter).runFold(0)((a, _) => a + 1)
   }
 
   def minimumTemperature: Future[Option[Temperature]] = {
-    val source = Source.fromGraph(data)
-    val map: Flow[ObservatoryData, Temperature, NotUsed] = Flow[ObservatoryData].mapAsync(2)(d => Future{d.temperature})
-    source.via(map).runFold(Option.empty[Temperature]){(t1, t2) =>
+    source.via(mapTemperature).runFold(Option.empty[Temperature]){(t1, t2) =>
       t1 match {
         case None => Some(t2)
         case Some(t) => t match {
@@ -38,9 +37,7 @@ case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(impl
   }
 
   def maximumTemperature: Future[Option[Temperature]] = {
-    val source = Source.fromGraph(data)
-    val map: Flow[ObservatoryData, Temperature, NotUsed] = Flow[ObservatoryData].mapAsync(2)(d => Future{d.temperature})
-    source.via(map).runFold(Option.empty[Temperature]){(t1, t2) =>
+    source.via(mapTemperature).runFold(Option.empty[Temperature]){(t1, t2) =>
       t1 match {
         case None => Some(t2)
         case Some(t) => t match {
@@ -51,4 +48,9 @@ case class DataAnalyser(data: Graph[SourceShape[ObservatoryData], NotUsed])(impl
     }
   }
 
+  private def mapTemperature = {
+    Flow[ObservatoryData].mapAsync(2)(d => Future {
+      d.temperature
+    })
+  }
 }

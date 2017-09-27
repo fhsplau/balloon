@@ -38,7 +38,7 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
 
   test("filter source") {
     val l: List[ObservatoryData] = Await.result(dataAnalyser.filter(_.is[Australia]), 2 seconds)
-    l should equal(List(Australia(timestamp, Celsius(10))))
+    l should equal(List(Australia(timestamp, Celsius(20))))
   }
 
   test("number of observations") {
