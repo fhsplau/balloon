@@ -8,7 +8,7 @@ import akka.stream.scaladsl.{GraphDSL, Merge, Source}
 import akka.stream.{ActorMaterializer, Graph, SourceShape}
 import akka.testkit.TestKit
 import org.balloon.data.observatory.{Other, _}
-import org.balloon.data.temperature.{Celsius, Fahrenheit, Kelvin}
+import org.balloon.data.temperature.{Celsius, Fahrenheit, Kelvin, Temperature}
 import org.balloon.data.utils.TimeStamp
 import org.scalatest.{FunSuiteLike, Matchers}
 
@@ -23,7 +23,7 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
     Australia(timestamp, Celsius(10)),
     UnitedStates(timestamp, Fahrenheit(50)),
     France(timestamp, Kelvin(283)),
-    Other("PL", timestamp, Kelvin(283)),
+    Other("PL", timestamp, Kelvin(0)),
     Other("DE", timestamp, Kelvin(283))
   ))
 
@@ -54,6 +54,12 @@ class DataAnalyserTest extends TestKit(ActorSystem("DataDeserializerTestSystem")
   test("0 if no observations") {
     val n: Int = Await.result(dataAnalyser.numOfObservations[Other](_.observatoryName == "GB"), 2 seconds)
     n should equal(0)
+  }
+
+  test("minimum temperature") {
+    val t: Option[Temperature] = Await.result(dataAnalyser.minimumTemperature, 2 seconds)
+    t should not be None
+    t.get should be(Kelvin(0))
   }
 
 }
