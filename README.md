@@ -7,7 +7,7 @@ Project Structure
 -
 This project contains four modules:
 
-- client - integrated ammonite repl with the project
+- client - ammonite repl integrated with the project
 - generator - program which generates simulation data
 - reader - program which reads and analyzes the data
 - data - project contains all the data structures and types used in this project
@@ -22,16 +22,16 @@ The command will build, test and create the distribution package(s).
 
 In the folder `client\build\distributions` you can find `client.zip` or `client.tar` package. Unpack it.
 
-The newly created directory will contain to sub directories `lib` and `bin`. Lib directory contains all the jar files which need to be loaded on runtime. Bin directory contains `client` script which, after execution, will start the client.
+The newly created directory will contain two sub directories `lib` and `bin`. Lib directory contains all the jar files which going to be loaded on runtime. Bin directory contains `client` script which starts the client.
 
 
 Running the client
 -
-`client` script will run the ammonite repl with all the necessary classes and objects pre-imported.
+`client` script will run the ammonite repl with all the necessary classes and objects pre-loaded.
 
 If you don't know what ammonite repl is check it out https://github.com/lihaoyi/Ammonite, it's really awesome.
 
-Pre-imported stuff
+Pre-loaded stuff
 -
 
  - org.balloon.data.temperature.{Celsius, Fahrenheit, Kelvin}
@@ -49,7 +49,7 @@ Pre-imported stuff
 
 Generating balloon data
 -
-To generate the data first you need to create `Generator` first. Simply type the following command in repl.
+To generate the data first you need to create `Generator`. Simply type the following command in repl.
 
 `val generator = Generator()`
 
@@ -61,11 +61,11 @@ The above command returns future.
 
 Reading data
 -
-To read the data you need to create reusable `DataReader` first. Type the following command in repl.
+To read the data you need to create `DataReader` first. Type the following command in repl.
 
 `val dataReader = new DataReader`
 
-Next step is to read the data (virtually only) by running `read` command.
+Next step is to read the data (virtually only) by running the `read` command.
 
 `val data = reader.read(Paths.get(<filename>))`
 
@@ -73,7 +73,7 @@ Next step is to read the data (virtually only) by running `read` command.
 
 Analysing the data
 -
-To analyse your data use `DataAnalyser` object returned by previously run command. `DataAnalyser` has got six functions which I have listed below.
+To analyse your data use `DataAnalyser` object returned by previously run command. `DataAnalyser` has got six analizers which were listed below.
 
 - `def filter(f: ObservatoryData => Boolean): Future[List[ObservatoryData]]`
 - `def numOfObservations[T <: Observatory[T] : TypeTag](f: ObservatoryData => Boolean = _ => true): Future[Int]`
@@ -82,12 +82,12 @@ To analyse your data use `DataAnalyser` object returned by previously run comman
 - `def meanTemperature[T <: TemperatureScale : TypeTag]: Future[Option[Temperature]]`
 - `def save(filename: Path, m: ObservatoryData => ObservatoryData): Future[IOResult]`
 
-As you can see every function returns future, so you can use `onComplete` method to be notified on completion or block with `Await` and wait for the result (Await was not pre-imported).
+As you can see every function returns a future, so you can use `onComplete` method to be notified on completion or block with `Await` and wait for the result (Await was not pre-loaded).
 
 Saving data
 -
 
-To save data use the following command
+To save the data use the following command
 
 `data.save(Paths.get("test"), d => d.copy(d.temperature.to[Celsius], d.coordinates.to[Kilometers]))`
 
